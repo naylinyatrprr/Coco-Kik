@@ -282,6 +282,12 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
   box-shadow: 0 4px 12px rgba(108, 92, 231, 0.35);
 }
 
+.admin-tab-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .admin-tab-btn {
   padding: 10px 20px;
   font-size: 0.88rem;
@@ -310,8 +316,85 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
+.overview-tab-btn {
+  background: rgba(255, 255, 255, 0.85);
+  color: #2d3436;
+  border: 1px solid #00cec9;
+}
+.overview-tab-btn:hover {
+  background: #ffffff;
+  color: #00b894;
+  border-color: #00b894;
+}
+.overview-tab-btn.active {
+  background: linear-gradient(135deg, #00cec9, #0984e3);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(0, 206, 201, 0.35);
+}
+
 .tab-content { display: none; }
 .tab-content.active { display: block; }
+
+/* Overview Tab Styles */
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+.overview-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.overview-card h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #2d3436;
+  font-size: 1.15rem;
+  border-bottom: 2px solid #6c5ce7;
+  padding-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.overview-card pre {
+  font-family: Arial, sans-serif;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  color: #4a5568;
+  line-height: 1.6;
+  font-size: 0.92rem;
+  margin: 0;
+  flex-grow: 1;
+}
+.copy-btn {
+  margin-top: 15px;
+  background: #6c5ce7;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.2s, transform 0.1s;
+}
+.copy-btn:hover {
+  background: #5b4cc4;
+  transform: translateY(-1px);
+}
+.copy-btn:active {
+  transform: translateY(0);
+}
 
 .gallery-layout {
   display: grid;
@@ -474,7 +557,71 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
       <button class="tab-btn" onclick="switchTab(event, 'floorplanTab')"> แปลนผังชั้น Floor Plan</button>
     </div>
 
-    <button class="admin-tab-btn" onclick="switchTab(event, 'backlogTab')">🔒Backlog</button>
+    <div class="admin-tab-group">
+      <button class="admin-tab-btn overview-tab-btn" onclick="switchTab(event, 'overviewTab')">📊 สรุปภาพรวมโครงการ</button>
+      <button class="admin-tab-btn" onclick="switchTab(event, 'backlogTab')">🔒Backlog</button>
+    </div>
+  </div>
+
+  <div id="overviewTab" class="tab-content">
+    <h2 style="color: #2d3436; border-left: 5px solid #00cec9; padding-left: 15px; margin-bottom: 20px;">สรุปภาพรวมโครงการ (Overview)</h2>
+    <div class="overview-grid">
+      
+      <!-- Card 1: ข้อมูลโครงการ -->
+      <div class="overview-card">
+        <h3>🏢 ข้อมูลโครงการ</h3>
+        <pre id="textCard1">ข้อมูลโครงการเคฟโคโค่บางแสน  
+โครงการพร้อมอยู่  
+- พื้นที่ 8 ไร่  1 งาน 1.2 ตารางวา
+- อาคาร Low rise 4 อาคาร แต่ละอาคารสูง 8 ชั้น  
+- ค่าส่วนกลาง 55 บาท/ตร.ม/เดือน 
+- ที่จอดรถ 50% (รวมมอเตอร์ไซต์) (ช่องชาร์จ ev 4 ที่ ใต้อาคาร D)
+
+รูปแบบห้อง มี 4 ไทป์ 
+- 1 bedroom 23 ตร.ม ราคาเริ่มต้น 1.79 MB  (หมด) 
+- 1 bedroom exclusive 26 ตร.ม ราคาเริ่มต้น 1.99 MB 
+- 1 bedroom extra 28 ตร.ม ราคาเริ่มต้น 2.49 MB 
+- 1 bedroom plus 34 ตร.ม ราคาเริ่มต้น 2.99 MB</pre>
+        <button class="copy-btn" onclick="copyTextFromElement('textCard1')">📋 คัดลอกข้อความ</button>
+      </div>
+
+      <!-- Card 2: เงื่อนไขการจอง -->
+      <div class="overview-card">
+        <h3>📝 เงื่อนไขการจอง</h3>
+        <pre id="textCard2">เงื่อนไขการจอง
+จอง 999 บาท
+ฟรีค่าทำสัญญา
+ฟรีเงินดาวน์</pre>
+        <button class="copy-btn" onclick="copyTextFromElement('textCard2')">📋 คัดลอกข้อความ</button>
+      </div>
+
+      <!-- Card 3: รายละเอียดการชำระเงิน -->
+      <div class="overview-card">
+        <h3>💳 รายละเอียดการชำระเงิน</h3>
+        <pre id="textCard3">รายละเอียดการชำระเงิน 
+ธนาคารกรุงเทพ 
+เลขที่บัญชี 134-7-58506-7
+ชื่อบัญชี บริษัท ไวส์ เอสเตท 18 จำกัด</pre>
+        <button class="copy-btn" onclick="copyTextFromElement('textCard3')">📋 คัดลอกข้อความ</button>
+      </div>
+
+      <!-- Card 4: โปรโมชั่นการโอนกรรมสิทธิ์ -->
+      <div class="overview-card" style="grid-column: 1 / -1;">
+        <h3>🎁 โปรโมชั่นฟรีค่าใช้จ่ายวันโอน</h3>
+        <pre id="textCard4">กรณีลูกค้าโอนกรรมสิทธิ์ภายใน     จะได้รับฟรีค่าใช้จ่าย ณ วันโอน ทั้งหมด 7รายการ ได้แก่
+1. ฟรีค่าส่วนกลาง 12 เดือน
+2. ฟรีค่ากองทุนแรกเข้า
+3. ฟรีค่าเบี้ยประกันอาคาร 
+4. ฟรีค่าดำเนินการจดทะเบียนนิติกรรม 
+5. ฟรีค่ารักษามาตรน้ำ 
+6. ฟรีค่าติดตั้งมิเตอร์ไฟฟ้า 
+7. ฟรีค่าดำเนินการโอนกรรมสิทธิ์
+
+ทั้งนี้ หากลูกค้าไม่สามารถโอนกรรมสิทธิ์ได้ตามเงื่อนไข (ยกเว้นอยู่ระหว่างขอสินเชื่อ) ทางโครงการขอสงวนสิทธิ์รายการโปรโมชั่นดังกล่าว</pre>
+        <button class="copy-btn" onclick="copyTextFromElement('textCard4')">📋 คัดลอกข้อความ</button>
+      </div>
+
+    </div>
   </div>
 
   <div id="roomTypesTab" class="tab-content active">
@@ -787,6 +934,15 @@ function showToast(message, bgColor = '#2ed573') {
   toast.style.backgroundColor = bgColor;
   toast.className = 'show';
   setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 2500);
+}
+
+function copyTextFromElement(elementId) {
+  const text = document.getElementById(elementId).innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('📋 คัดลอกข้อความลงคลิปบอร์ดแล้ว!');
+  }).catch(err => {
+    showToast('⚠️ ไม่สามารถคัดลอกข้อความได้', '#ff6b81');
+  });
 }
 
 function switchTab(evt, tabId) {
@@ -1156,7 +1312,7 @@ function openModal(unitId) {
     <p><strong>ชั้น:</strong> ชั้น ${u.floor}</p>
     <p><strong>วิว:</strong> ${u.side || '-'}</p>
     <p><strong>ราคาปกติ:</strong> <span style="text-decoration: line-through; color: #888;">${u.price}</span> ล้านบาท</p>
-    <p><strong>ราคาพิเศษ :</strong> <span style="color: #ff4757; font-size: 1.2rem; font-weight: bold;">${u.sale}</span> ล้านบาท</p>
+    <p><strong>ราคาพิเศษ (Sale Price):</strong> <span style="color: #ff4757; font-size: 1.2rem; font-weight: bold;">${u.sale}</span> ล้านบาท</p>
     ${highlightsHTML}
     ${remarkHTML}
   `;
