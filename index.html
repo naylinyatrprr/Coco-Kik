@@ -83,6 +83,28 @@ header p {
   background: rgba(108, 92, 231, 0.05);
 }
 
+/* responsive rule: ซ่อนคอลัมน์ขนาดและราคาปกติบนหน้าจอมือถือ (<= 600px) */
+@media (max-width: 600px) {
+  /* ตารางยูนิตพร้อมขาย: ซ่อนคอลัมน์ที่ 4 (ขนาด) และ คอลัมน์ที่ 6 (ราคาปกติ) */
+  #unitsTab .excel-table th:nth-child(4),
+  #unitsTab .excel-table td:nth-child(4),
+  #unitsTab .excel-table th:nth-child(6),
+  #unitsTab .excel-table td:nth-child(6) {
+    display: none;
+  }
+
+  /* ตาราง Backlog: ซ่อนคอลัมน์ที่ 3 (ขนาด) */
+  #backlogTab .excel-table th:nth-child(3),
+  #backlogTab .excel-table td:nth-child(3) {
+    display: none;
+  }
+
+  .excel-table th, .excel-table td {
+    padding: 8px 6px;
+    font-size: 0.8rem;
+  }
+}
+
 .unit-tag-ready {
   background-color: #ff7675;
   color: #fff;
