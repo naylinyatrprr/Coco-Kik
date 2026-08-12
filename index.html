@@ -780,22 +780,10 @@ const roomGallery = {
 };
 
 const roomPlans = {
-  '1 Bed Extra': {
-    src: 'https://i.ibb.co/7dKsTtxB/25-exclu.png',
-    title: 'แปลนห้อง - 1 Bed Extra'
-  },
-  '1 Bed Exclusive': {
-    src: 'https://i.ibb.co/7dKsTtxB/25-exclu.png',
-    title: 'แปลนห้อง - 1 Bed Exclusive'
-  },
-  '1 Bedroom': {
-    src: 'https://i.ibb.co/7dKsTtxB/25-exclu.png',
-    title: 'แปลนห้อง - 1 Bedroom'
-  },
-  '1 Bed plus': {
-    src: 'https://i.ibb.co/7dKsTtxB/25-exclu.png',
-    title: 'แปลนห้อง - 1 Bed Plus'
-  }
+  '1 Bed Extra': { src: 'https://i.ibb.co/7dKsTtxB/25-exclu.png', title: 'แปลนห้อง - 1 Bed Extra' },
+  '1 Bed Exclusive': { src: 'https://i.ibb.co/7dKsTtxB/25-exclu.png', title: 'แปลนห้อง - 1 Bed Exclusive' },
+  '1 Bedroom': { src: 'https://i.ibb.co/7dKsTtxB/25-exclu.png', title: 'แปลนห้อง - 1 Bedroom' },
+  '1 Bed plus': { src: 'https://i.ibb.co/7dKsTtxB/25-exclu.png', title: 'แปลนห้อง - 1 Bed Plus' }
 };
 
 function showToast(message, bgColor = '#2ed573') {
@@ -963,23 +951,39 @@ function changePage(direction) {
   render();
 }
 
+/* ปรับปรุงฟังก์ชัน render() ให้รองรับการกรองข้อมูลที่ถูกต้อง */
 function render() {
   const search = document.getElementById('searchInput').value.toUpperCase().trim();
   const building = document.getElementById('buildingFilter').value;
   const type = document.getElementById('typeFilter').value;
   const floor = document.getElementById('floorFilter').value;
+  const side = document.getElementById('SideFilter').value;
   const priceRange = document.getElementById('priceFilter').value;
 
   const filtered = units.filter(u => {
     if (solds.includes(u.id)) return false; 
     
+    // 1. ค้นหาเลขห้อง
     if (search && !u.id.toUpperCase().includes(search)) return false;
-    if (building !== 'all' && !u.id.startsWith(building)) return false;
-    if (type !== 'all' && u.type !== type) return false;
-    if (floor !== 'all' && u.floor !== parseInt(floor)) return false;
 
+    // 2. กรองอาคาร (ตรวจสอบอักษรแรกของ ID)
+    if (building !== 'all' && !u.id.toUpperCase().startsWith(building.toUpperCase())) return false;
+
+    // 3. กรองประเภทห้อง
+    if (type !== 'all' && u.type !== type) return false;
+
+    // 4. กรองชั้น
+    if (floor !== 'all' && Number(u.floor) !== Number(floor)) return false;
+
+    // 5. กรองวิว (รองรับทั้งข้อความและตัวเลข)
+    if (side !== 'all' && u.side) {
+      if (side === '2' && !u.side.includes('นอก') && u.side !== '2') return false;
+      if (side === '3' && !u.side.includes('ใน') && u.side !== '3') return false;
+    }
+
+    // 6. กรองช่วงราคา Sale
     if (priceRange !== 'all') {
-      const numPrice = parseFloat(u.sale.replace(/[^0-9.]/g, '')) || 0;
+      const numPrice = parseFloat(String(u.sale).replace(/[^0-9.]/g, '')) || 0;
       if (priceRange.startsWith('<=')) {
         const max = parseFloat(priceRange.replace('<=', ''));
         if (numPrice > max) return false;
@@ -1278,5 +1282,3 @@ window.onload = function() {
   loadSheetsData();
 };
 </script>
-</body>
-</html>
