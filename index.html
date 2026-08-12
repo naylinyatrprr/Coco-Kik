@@ -828,36 +828,30 @@ function parseCSV(text) {
     const row = parseCSVLine(lines[i]);
     const item = { remark: '', hasRemark: false, highlights: [], hasHighlight: false, side: '', sale: '', price: '' };
 
-    // อ่านข้อมูลตาม Header name หรือ Index ตรงตำแหน่ง (G คือ index 6, H คือ index 7)
+    // ล็อคอ่านคอลัมน์ด้วย Index ตรงๆ ป้องกันชื่อ Header ลำดับสลับ
+    // A=0, B=1, C=2, D=3, E=4, F=5, G=6, H=7
+    item['id'] = row[0] || '';
+    item['type'] = row[1] || '';
+    item['size'] = row[2] || '';
+    item['floor'] = parseInt(row[3]) || (row[3] ? parseInt(row[3].match(/\d+/)) : 0);
+    item['price'] = row[5] || '';  // คอลัมน์ F (ราคาปกติ)
+    item['sale'] = row[6] || '';   // คอลัมน์ G (ราคาพิเศษ) **ดึงตรงๆ ไม่ผ่านเงื่อนไขชื่อ**
+    item['side'] = row[7] || '';   // คอลัมน์ H (วิว)
+    
+    // คอลัมน์อื่นๆ อ่านตามชื่อ Header
     headers.forEach((h, index) => {
       let val = row[index] ? row[index].trim() : '';
-      
-      if (['id', 'unit', 'unit_id', 'room', 'เลขห้อง'].includes(h)) {
-        item['id'] = val;
-      } else if (['type', 'room_type', 'ประเภท'].includes(h)) {
-        item['type'] = val;
-      } else if (['size', 'sqm', 'ขนาด'].includes(h)) {
-        item['size'] = val;
-      } else if (['floor', 'ชั้น'].includes(h)) {
-        item['floor'] = parseInt(val) || (val.match(/\d+/) ? parseInt(val.match(/\d+/)[0]) : 0);
-      } else if (['price', 'ราคาปกติ'].includes(h)) {
-        item['price'] = val;
-      } else if (['sale', 'saleprice', 'ราคาพิเศษ', 'hotdeal'].includes(h) || index === 6) { // คอลัมน์ G (Index 6)
-        item['sale'] = val;
-      } else if (['side', 'view', 'วิว'].includes(h) || index === 7) { // คอลัมน์ H (Index 7)
-        item['side'] = val;
-      } else if (['highlights', 'highlight', 'จุดเด่น'].includes(h)) {
+      if (['highlights', 'highlight', 'จุดเด่น'].includes(h)) {
         item['highlights'] = val ? val.split(';').map(x => x.trim()) : [];
         item['hasHighlight'] = val.length > 0;
-      } else if (['remark', 'remarks', 'หมายเหตุ'].includes(h)) {
+      } else if (['remark', 'remarks', 'หมายเหตุ'].includes(h) && index > 7) { 
+        // อ่าน remark เฉพาะคอลัมน์หลัง H เป็นต้นไป ไม่ให้แย่งคอลัมน์ G
         if (val.length > 0) {
           item['remark'] = val;
           item['hasRemark'] = true;
         }
       } else if (['status', 'backlog', 'backlog_status', 'สถานะ'].includes(h)) {
         item['sheetStatus'] = val;
-      } else {
-        item[h] = val;
       }
     });
 
@@ -880,75 +874,6 @@ function parseCSV(text) {
   return data;
 }
 
-async function loadSheetsData() {
-  const gridEl = document.getElementById('units');
-  gridEl.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 30px; color: #6c5ce7; font-weight: bold;">⏳ กำลังโหลดข้อมูลยูนิตจาก Google Sheets...</td></tr>';
-  
-  try {
-    const response = await fetch(SHEET_CSV_URL);
-    if (!response.ok) throw new Error("HTTP Status " + response.status);
-    const csvData = await response.text();
-    units = parseCSV(csvData);
-
-    if (units.length === 0) {
-      gridEl.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 30px; color: #ff4757; font-weight: bold;">⚠️ โหลดไฟล์สำเร็จ แต่ไม่พบข้อมูลยูนิต</td></tr>';
-      return;
-    }
-
-    render();
-    renderBacklog();
-  } catch (error) {
-    console.error("Error loading CSV:", error);
-    gridEl.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 30px; color: #ff4757; font-weight: bold;">⚠️ ไม่สามารถโหลดข้อมูลได้</td></tr>';
-  }
-}
-
-function switchTab(evt, tabName) {
-  const tabcontents = document.getElementsByClassName("tab-content");
-  for (let i = 0; i < tabcontents.length; i++) tabcontents[i].classList.remove("active");
-  
-  const tabbtns = document.getElementsByClassName("tab-btn");
-  for (let i = 0; i < tabbtns.length; i++) tabbtns[i].classList.remove("active");
-
-  const adminBtn = document.querySelector(".admin-tab-btn");
-  if (adminBtn) adminBtn.classList.remove("active");
-
-  document.getElementById(tabName).classList.add("active");
-  evt.currentTarget.classList.add("active");
-}
-
-function openRoomPlan(roomType) {
-  const plan = roomPlans[roomType];
-  if (plan) {
-    document.getElementById('zoomedImg').src = plan.src;
-    document.getElementById('zoomCaption').textContent = plan.title;
-    document.getElementById('imageZoomModal').style.display = 'flex';
-  }
-}
-
-function openImageZoom(element) {
-  const imgSource = element.querySelector('img').src;
-  const imgAlt = element.querySelector('img').alt || '';
-  document.getElementById('zoomedImg').src = imgSource;
-  document.getElementById('zoomCaption').textContent = imgAlt;
-  document.getElementById('imageZoomModal').style.display = 'flex';
-}
-
-function closeImageZoom() { 
-  document.getElementById('imageZoomModal').style.display = 'none'; 
-}
-
-function handleFilterChange() { 
-  currentPage = 1; 
-  render(); 
-}
-
-function changePage(direction) {
-  currentPage += direction;
-  render();
-}
-
-/* ระบบ Filter ที่ปรับปรุงเรื่องราคา (คอลัมน์ G) และ วิว (คอลัมน์ H) */
 function render() {
   const search = document.getElementById('searchInput').value.toUpperCase().trim();
   const building = document.getElementById('buildingFilter').value;
@@ -960,37 +885,26 @@ function render() {
   const filtered = units.filter(u => {
     if (solds.includes(u.id)) return false; 
     
-    // 1. ค้นหาเลขห้อง
     if (search && !u.id.toUpperCase().includes(search)) return false;
-
-    // 2. กรองอาคาร
     if (building !== 'all' && !u.id.toUpperCase().startsWith(building.toUpperCase())) return false;
-
-    // 3. กรองประเภทห้อง
     if (type !== 'all' && u.type !== type) return false;
-
-    // 4. กรองชั้น
     if (floor !== 'all' && Number(u.floor) !== Number(floor)) return false;
 
-    // 5. กรองวิว (คอลัมน์ H: รองรับข้อความ วิวนอก/วิวใน และตัวเลข 2/3)
+    // กรองวิว (คอลัมน์ H)
     if (side !== 'all') {
       const uSide = String(u.side || '').trim().toLowerCase();
-      if (side === '2') {
-        // วิวนอก
-        if (!uSide.includes('นอก') && uSide !== '2') return false;
-      } else if (side === '3') {
-        // วิวใน
-        if (!uSide.includes('ใน') && uSide !== '3') return false;
-      }
+      if (side === '2' && !uSide.includes('นอก') && uSide !== '2') return false;
+      if (side === '3' && !uSide.includes('ใน') && uSide !== '3') return false;
     }
 
-    // 6. กรองราคาพิเศษ (คอลัมน์ G: แปลงสตริงให้เป็นตัวเลขทศนิยมที่สมบูรณ์)
+    // กรองราคา (คอลัมน์ G) - คลีนตัวเลขแบบครอบคลุม
     if (priceRange !== 'all') {
-      // ดึงเฉพาะตัวเลขและจุดทศนิยม
-      const rawPrice = String(u.sale || '').replace(/,/g, '');
-      const match = rawPrice.match(/\d+(\.\d+)?/);
+      // ดึงตัวเลขและจุดทศนิยมแรกที่เจอ เช่น "2.39 ลบ." -> 2.39
+      const cleanString = String(u.sale || u.price || '').replace(/,/g, '');
+      const match = cleanString.match(/\d+(\.\d+)?/);
       const numPrice = match ? parseFloat(match[0]) : 0;
 
+      // ถ้าแปลงราคาไม่ได้ให้ข้ามการกรอง แต่ถ้าเจอตัวเลขค่อยนำมาเทียบ
       if (numPrice > 0) {
         if (priceRange.startsWith('<=')) {
           const max = parseFloat(priceRange.replace('<=', ''));
@@ -1007,6 +921,7 @@ function render() {
     return true;
   });
 
+  // อัปเดตการแสดงผล HTML ตามปกติ...
   document.getElementById('availableCount').innerText = units.filter(u => !solds.includes(u.id)).length;
   document.getElementById('compareCount').innerText = compare.length;
   document.getElementById('favCount').innerText = favorites.length;
@@ -1064,78 +979,7 @@ function render() {
     container.appendChild(tr);
   });
 }
-
-function renderBacklog() {
-  const search = document.getElementById('backlogSearchInput').value.toUpperCase().trim();
-  const statusFilter = document.getElementById('backlogStatusFilter').value;
-
-  let soldUnits = units.filter(u => solds.includes(u.id));
-
-  let bookingCount = 0, onProgressCount = 0, transferCount = 0, urgentCount = 0;
-  soldUnits.forEach(u => {
-    const st = backlogStatus[u.id] || 'Booking';
-    if (st === 'Booking') bookingCount++;
-    else if (st === 'On progress') onProgressCount++;
-    else if (st === 'Transfer') transferCount++;
-    else if (st === 'Urgent support!') urgentCount++;
-  });
-
-  document.getElementById('countBooking').innerText = bookingCount;
-  document.getElementById('countOnProgress').innerText = onProgressCount;
-  document.getElementById('countTransfer').innerText = transferCount;
-  document.getElementById('countUrgent').innerText = urgentCount;
-  document.getElementById('countTotalSold').innerText = soldUnits.length;
-
-  const filtered = soldUnits.filter(u => {
-    if (search && !u.id.toUpperCase().includes(search)) return false;
-    const currentStatus = backlogStatus[u.id] || 'Booking';
-    if (statusFilter !== 'all' && currentStatus !== statusFilter) return false;
-    return true;
-  });
-
-  document.getElementById('backlogFilterCount').innerText = filtered.length;
-
-  const container = document.getElementById('backlogUnits');
-  container.innerHTML = '';
-
-  if (filtered.length === 0) {
-    container.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 30px; color: #7f8c8d; font-weight: bold;">📦 ไม่พบรายการใน Backlog ตามเงื่อนไข</td></tr>';
-    return;
-  }
-
-  filtered.forEach(u => {
-    const currentStatus = backlogStatus[u.id] || 'Booking';
-
-    let badgeHtml = '';
-    if (u.hasRemark) {
-      badgeHtml = `<span class="unit-tag-remark">Remark</span>`;
-    } else if (u.hasHighlight) {
-      badgeHtml = `<span class="unit-tag-ready">Ready</span>`;
-    }
-
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td style="font-weight: bold; color: #2d3436;">${u.id} ${badgeHtml}</td>
-      <td>${u.type}</td>
-      <td>${u.size} ตร.ม.</td>
-      <td>ชั้น ${u.floor}</td>
-      <td style="color: #ff4757; font-weight: bold;">${u.sale} ลบ.</td>
-      <td>
-        <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-          <button class="status-btn btn-booking ${currentStatus === 'Booking' ? 'active' : ''}" ondblclick="setBacklogStatus('${u.id}', 'Booking')">Booking</button>
-          <button class="status-btn btn-on-progress ${currentStatus === 'On progress' ? 'active' : ''}" ondblclick="setBacklogStatus('${u.id}', 'On progress')">Progress</button>
-          <button class="status-btn btn-transfer ${currentStatus === 'Transfer' ? 'active' : ''}" ondblclick="setBacklogStatus('${u.id}', 'Transfer')">Transfer</button>
-          <button class="status-btn btn-urgent ${currentStatus === 'Urgent support!' ? 'active' : ''}" ondblclick="setBacklogStatus('${u.id}', 'Urgent support!')">Urgent</button>
-        </div>
-      </td>
-      <td style="text-align: center;">
-        <button style="background: #dfe6e9; color: #2d3436; padding: 6px 10px;" ondblclick="revertToAvailable('${u.id}')">ดึงกลับ</button>
-      </td>
-    `;
-    container.appendChild(tr);
-  });
-}
-
+  
 function filterBacklogStatus(status) {
   document.getElementById('backlogStatusFilter').value = status;
   renderBacklog();
