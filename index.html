@@ -763,7 +763,7 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
       <div class="filter-summary-badge" id="filterSummaryBox">
          ผลการกรอง: <span id="filterCount">0</span> ห้อง
       </div>
-      <button class="reset-filter-btn" onclick="resetUnitsFilter()">🔄 ล้างการกรองทั้งหมด</button>
+      <button class="reset-filter-btn" onclick="resetUnitsFilter()">ล้างการกรองทั้งหมด</button>
     </div>
 
     <!-- Excel-Style Table View -->
@@ -840,7 +840,7 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
       <div class="filter-summary-badge" style="background: linear-gradient(135deg, #2ed573, #1e90ff);">
         📊 จำนวนในรายการ Backlog: <span id="backlogFilterCount">0</span> ห้อง
       </div>
-      <button class="reset-filter-btn" onclick="resetBacklogFilter()">🔄 ล้างการกรองทั้งหมด</button>
+      <button class="reset-filter-btn" onclick="resetBacklogFilter()"></button>
     </div>
 
     <!-- Excel-Style Table View for Backlog -->
@@ -1122,7 +1122,7 @@ function resetUnitsFilter() {
   document.getElementById('priceFilter').value = 'all';
   currentPage = 1;
   render();
-  showToast('🔄 ล้างการกรองยูนิตพร้อมขายเรียบร้อย', '#6c5ce7');
+  showToast('ล้างการกรองยูนิตพร้อมขายเรียบร้อย', '#6c5ce7');
 }
 
 function resetBacklogFilter() {
@@ -1130,7 +1130,7 @@ function resetBacklogFilter() {
   document.getElementById('backlogTypeFilter').value = 'all';
   document.getElementById('backlogStatusFilter').value = 'all';
   renderBacklog();
-  showToast('🔄 ล้างการกรอง Backlog เรียบร้อย', '#2ed573');
+  showToast('ล้างการกรอง Backlog เรียบร้อย', '#2ed573');
 }
 
 function changePage(delta) {
