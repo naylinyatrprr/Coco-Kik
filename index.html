@@ -591,6 +591,13 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
 
     <div class="filter-bar" style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
       <input type="text" id="backlogSearchInput" placeholder="🔍 ค้นหาเลขห้อง Backlog..." oninput="renderBacklog()" style="padding: 10px; border-radius: 8px; border: 1px solid #ccc; flex: 1; min-width: 200px;">
+      <select id="backlogTypeFilter" onchange="renderBacklog()" style="padding: 10px; border-radius: 8px; border: 1px solid #ccc;">
+    <option value="all">ทุกประเภทห้อง</option>
+    <option value="1 Bedroom">1 Bedroom</option>
+    <option value="1 Bed Exclusive">1 Bed Exclusive</option>
+    <option value="1 Bed Extra">1 Bed Extra</option>
+    <option value="1 Bed plus">1 Bed plus</option>
+  </select>
       <select id="backlogStatusFilter" onchange="renderBacklog()" style="padding: 10px; border-radius: 8px; border: 1px solid #ccc;">
         <option value="all">ทุกสถานะ Backlog</option>
         <option value="Booking">Booking</option>
