@@ -523,7 +523,7 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
         <option value="<=1.89">1.80 - 1.89 MB</option>
         <option value="<=1.99">1.90 - 1.99 MB</option>
         <option value="<=2.09">2.00 - 2.09 MB</option>
-        <option value="<=2.10">2.10 - 2.19 MB</option>
+        <option value="<=2.19">2.10 - 2.19 MB</option>
         <option value="<=2.29">2.20 - 2.29 MB</option>
         <option value="<=2.39">2.30 - 2.39 MB</option>
         <option value="<=2.49">2.40 - 2.49 MB</option>
@@ -799,7 +799,7 @@ function parseCSV(text) {
 
   for (let i = 1; i < lines.length; i++) {
     const row = parseCSVLine(lines[i]);
-    const item = { remark: '', hasRemark: false, highlights: [], hasHighlight: false, side: '', sale: '', price: '' };
+    const item = { remark: '', hasRemark: false, highlights: [], hasHighlight: false, side: '', sale: 0, price: '' };
 
     item['id'] = row[0] || '';
     item['type'] = row[1] || '';
@@ -807,10 +807,19 @@ function parseCSV(text) {
     item['floor'] = row[4] || '';
     item['price'] = row[5] || ''; 
     
-    // แก้ไขจุดผิดพลาเดิม (ลบวรรณยุกต์ไทยออก) และจัดการแปลงคอมมาในตัวเลข
+    // ดึงราคาจากคอลัมน์ G (Index 6) แปลงจากราคาเต็ม (เช่น 2,500,000) เป็นหน่วยล้าน (2.5)
     const rawSaleVal = row[6] ? row[6].replace(/,/g, '') : '';
     const saleMatch = rawSaleVal.match(/\d+(\.\d+)?/);
-    item['sale'] = saleMatch ? parseFloat(saleMatch[0]) : (parseFloat(rawSaleVal) || 0);
+    if (saleMatch) {
+      let parsedNum = parseFloat(saleMatch[0]);
+      // หากราคามากกว่า 1,000 แสดงว่าเป็นราคาเต็ม (เช่น 2,500,000) ให้หาร 1,000,000 เพื่อแปลงเป็นหน่วยล้านบาท
+      if (parsedNum > 1000) {
+        parsedNum = parsedNum / 1000000;
+      }
+      item['sale'] = parsedNum;
+    } else {
+      item['sale'] = 0;
+    }
     
     item['side'] = row[7] || '';  
     
@@ -895,9 +904,7 @@ function render() {
     }
 
     if (priceRange !== 'all') {
-      const cleanString = String(u.sale || u.price || '').replace(/,/g, '');
-      const match = cleanString.match(/\d+(\.\d+)?/);
-      const numPrice = match ? parseFloat(match[0]) : 0;
+      const numPrice = u.sale || 0;
 
       if (numPrice > 0) {
         if (priceRange.startsWith('<=')) {
