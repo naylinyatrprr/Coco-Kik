@@ -592,12 +592,12 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
     <div class="filter-bar" style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
       <input type="text" id="backlogSearchInput" placeholder="🔍 ค้นหาเลขห้อง Backlog..." oninput="renderBacklog()" style="padding: 10px; border-radius: 8px; border: 1px solid #ccc; flex: 1; min-width: 200px;">
       <select id="backlogTypeFilter" onchange="renderBacklog()" style="padding: 10px; border-radius: 8px; border: 1px solid #ccc;">
-    <option value="all">ทุกประเภทห้อง</option>
-    <option value="1 Bedroom">1 Bedroom</option>
-    <option value="1 Bed Exclusive">1 Bed Exclusive</option>
-    <option value="1 Bed Extra">1 Bed Extra</option>
-    <option value="1 Bed plus">1 Bed plus</option>
-  </select>
+        <option value="all">ทุกประเภทห้อง</option>
+        <option value="1 Bedroom">1 Bedroom</option>
+        <option value="1 Bed Exclusive">1 Bed Exclusive</option>
+        <option value="1 Bed Extra">1 Bed Extra</option>
+        <option value="1 Bed plus">1 Bed plus</option>
+      </select>
       <select id="backlogStatusFilter" onchange="renderBacklog()" style="padding: 10px; border-radius: 8px; border: 1px solid #ccc;">
         <option value="all">ทุกสถานะ Backlog</option>
         <option value="Booking">Booking</option>
@@ -980,6 +980,7 @@ function render() {
 function renderBacklog() {
   const search = document.getElementById('backlogSearchInput').value.toUpperCase().trim();
   const statusFilter = document.getElementById('backlogStatusFilter').value;
+  const typeFilter = document.getElementById('backlogTypeFilter').value;
 
   let counts = { 'Booking': 0, 'On progress': 0, 'Transfer': 0, 'Urgent support!': 0 };
   
@@ -997,6 +998,7 @@ function renderBacklog() {
   const soldUnits = units.filter(u => solds.includes(u.id));
   const filteredBacklog = soldUnits.filter(u => {
     if (search && !u.id.toUpperCase().includes(search)) return false;
+    if (typeFilter !== 'all' && u.type !== typeFilter) return false;
     const currentSt = backlogStatus[u.id] || 'Booking';
     if (statusFilter !== 'all' && currentSt !== statusFilter) return false;
     return true;
