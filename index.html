@@ -826,15 +826,11 @@ function parseCSV(text) {
 
   for (let i = 1; i < lines.length; i++) {
     const row = parseCSVLine(lines[i]);
-    const item = { remark: '', hasRemark: false, highlights: [], hasHighlight: false };
-    
-    if (row[7] && row[7].trim().length > 0) {
-      item['remark'] = row[7].trim();
-      item['hasRemark'] = true;
-    }
+    const item = { remark: '', hasRemark: false, highlights: [], hasHighlight: false, side: '', sale: '', price: '' };
 
+    // อ่านข้อมูลตาม Header name หรือ Index ตรงตำแหน่ง (G คือ index 6, H คือ index 7)
     headers.forEach((h, index) => {
-      let val = row[index] ? row[index] : '';
+      let val = row[index] ? row[index].trim() : '';
       
       if (['id', 'unit', 'unit_id', 'room', 'เลขห้อง'].includes(h)) {
         item['id'] = val;
@@ -846,20 +842,20 @@ function parseCSV(text) {
         item['floor'] = parseInt(val) || (val.match(/\d+/) ? parseInt(val.match(/\d+/)[0]) : 0);
       } else if (['price', 'ราคาปกติ'].includes(h)) {
         item['price'] = val;
-      } else if (['sale', 'saleprice', 'ราคาพิเศษ', 'hotdeal'].includes(h)) {
+      } else if (['sale', 'saleprice', 'ราคาพิเศษ', 'hotdeal'].includes(h) || index === 6) { // คอลัมน์ G (Index 6)
         item['sale'] = val;
-      } else if (['side','วิว'].includes(h)) {
+      } else if (['side', 'view', 'วิว'].includes(h) || index === 7) { // คอลัมน์ H (Index 7)
         item['side'] = val;
       } else if (['highlights', 'highlight', 'จุดเด่น'].includes(h)) {
         item['highlights'] = val ? val.split(';').map(x => x.trim()) : [];
-        item['hasHighlight'] = val.trim().length > 0;
+        item['hasHighlight'] = val.length > 0;
       } else if (['remark', 'remarks', 'หมายเหตุ'].includes(h)) {
-        if (val.trim().length > 0) {
-          item['remark'] = val.trim();
+        if (val.length > 0) {
+          item['remark'] = val;
           item['hasRemark'] = true;
         }
       } else if (['status', 'backlog', 'backlog_status', 'สถานะ'].includes(h)) {
-        item['sheetStatus'] = val.trim();
+        item['sheetStatus'] = val;
       } else {
         item[h] = val;
       }
@@ -952,7 +948,7 @@ function changePage(direction) {
   render();
 }
 
-/* ปรับปรุงฟังก์ชัน render() ให้รองรับการกรองข้อมูลที่ถูกต้อง */
+/* ระบบ Filter ที่ปรับปรุงเรื่องราคา (คอลัมน์ G) และ วิว (คอลัมน์ H) */
 function render() {
   const search = document.getElementById('searchInput').value.toUpperCase().trim();
   const building = document.getElementById('buildingFilter').value;
@@ -967,7 +963,7 @@ function render() {
     // 1. ค้นหาเลขห้อง
     if (search && !u.id.toUpperCase().includes(search)) return false;
 
-    // 2. กรองอาคาร (ตรวจสอบอักษรแรกของ ID)
+    // 2. กรองอาคาร
     if (building !== 'all' && !u.id.toUpperCase().startsWith(building.toUpperCase())) return false;
 
     // 3. กรองประเภทห้อง
@@ -976,24 +972,36 @@ function render() {
     // 4. กรองชั้น
     if (floor !== 'all' && Number(u.floor) !== Number(floor)) return false;
 
-    // 5. กรองวิว (รองรับทั้งข้อความและตัวเลข)
-    if (side !== 'all' && u.side) {
-      if (side === '2' && !u.side.includes('นอก') && u.side !== '2') return false;
-      if (side === '3' && !u.side.includes('ใน') && u.side !== '3') return false;
+    // 5. กรองวิว (คอลัมน์ H: รองรับข้อความ วิวนอก/วิวใน และตัวเลข 2/3)
+    if (side !== 'all') {
+      const uSide = String(u.side || '').trim().toLowerCase();
+      if (side === '2') {
+        // วิวนอก
+        if (!uSide.includes('นอก') && uSide !== '2') return false;
+      } else if (side === '3') {
+        // วิวใน
+        if (!uSide.includes('ใน') && uSide !== '3') return false;
+      }
     }
 
-    // 6. กรองช่วงราคา Sale
+    // 6. กรองราคาพิเศษ (คอลัมน์ G: แปลงสตริงให้เป็นตัวเลขทศนิยมที่สมบูรณ์)
     if (priceRange !== 'all') {
-      const numPrice = parseFloat(String(u.sale).replace(/[^0-9.]/g, '')) || 0;
-      if (priceRange.startsWith('<=')) {
-        const max = parseFloat(priceRange.replace('<=', ''));
-        if (numPrice > max) return false;
-      } else if (priceRange.includes('-')) {
-        const [min, max] = priceRange.split('-').map(parseFloat);
-        if (numPrice < min || numPrice > max) return false;
-      } else if (priceRange.startsWith('>=')) {
-        const min = parseFloat(priceRange.replace('>=', ''));
-        if (numPrice < min) return false;
+      // ดึงเฉพาะตัวเลขและจุดทศนิยม
+      const rawPrice = String(u.sale || '').replace(/,/g, '');
+      const match = rawPrice.match(/\d+(\.\d+)?/);
+      const numPrice = match ? parseFloat(match[0]) : 0;
+
+      if (numPrice > 0) {
+        if (priceRange.startsWith('<=')) {
+          const max = parseFloat(priceRange.replace('<=', ''));
+          if (numPrice > max) return false;
+        } else if (priceRange.includes('-')) {
+          const [min, max] = priceRange.split('-').map(parseFloat);
+          if (numPrice < min || numPrice > max) return false;
+        } else if (priceRange.startsWith('>=')) {
+          const min = parseFloat(priceRange.replace('>=', ''));
+          if (numPrice < min) return false;
+        }
       }
     }
     return true;
@@ -1222,6 +1230,7 @@ function openModal(unitId) {
     <p><strong>ประเภทห้อง:</strong> ${u.type}</p>
     <p><strong>ขนาดพื้นที่:</strong> ${u.size} ตารางเมตร</p>
     <p><strong>ชั้น:</strong> ชั้น ${u.floor}</p>
+    <p><strong>วิว:</strong> ${u.side || '-'}</p>
     <p><strong>ราคาปกติ:</strong> <span style="text-decoration: line-through; color: #888;">${u.price}</span> ล้านบาท</p>
     <p><strong>ราคาพิเศษ (Sale Price):</strong> <span style="color: #ff4757; font-size: 1.2rem; font-weight: bold;">${u.sale}</span> ล้านบาท</p>
     ${highlightsHTML}
