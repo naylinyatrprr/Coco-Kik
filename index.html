@@ -804,9 +804,9 @@ function parseCSV(text) {
     item['id'] = row[0] || '';
     item['type'] = row[1] || '';
     item['size'] = row[2] || '';
-    item['floor'] = parseInt(row[3]) || (row[3] ? parseInt(row[3].match(/\d+/)) : 0);
+    item['floor'] = row[4] || '';
     item['price'] = row[5] || ''; 
-    item['sale'] = row[6] || '';  
+    item['sale'] = parseInt(row[ุ6]) || (row[6] ? parseInt(row[6].match(/\d+/)) : 0);
     item['side'] = row[7] || '';  
     
     headers.forEach((h, index) => {
