@@ -973,7 +973,7 @@ function render() {
       <td style="color: #ff4757; font-weight: bold;">${u.sale} ลบ.</td>
       <td style="text-align: center; white-space: nowrap;">
         <button class="primary" onclick="openModal('${u.id}')" style="margin-right: 4px;">รายละเอียด</button>
-        <button class="secondary" onclick="markAsSold('${u.id}')">ขาย</button>
+        <button class="secondary" ondblclick="markAsSold('${u.id}')">ขาย</button>
       </td>
     `;
     container.appendChild(tr);
@@ -1025,14 +1025,14 @@ function renderBacklog() {
       <td style="color: #ff4757; font-weight: bold;">${u.sale} ลบ.</td>
       <td>
         <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-          <button class="status-btn btn-booking ${st === 'Booking' ? 'active' : ''}" onclick="setBacklogStatus('${u.id}', 'Booking')">Booking</button>
-          <button class="status-btn btn-on-progress ${st === 'On progress' ? 'active' : ''}" onclick="setBacklogStatus('${u.id}', 'On progress')">On progress</button>
-          <button class="status-btn btn-transfer ${st === 'Transfer' ? 'active' : ''}" onclick="setBacklogStatus('${u.id}', 'Transfer')">Transfer</button>
-          <button class="status-btn btn-urgent ${st === 'Urgent support!' ? 'active' : ''}" onclick="setBacklogStatus('${u.id}', 'Urgent support!')">Urgent</button>
+          <button class="status-btn btn-booking ${st === 'Booking' ? 'active' : ''}" ondblclick="setBacklogStatus('${u.id}', 'Booking')">Booking</button>
+          <button class="status-btn btn-on-progress ${st === 'On progress' ? 'active' : ''}" ondblclick="setBacklogStatus('${u.id}', 'On progress')">On progress</button>
+          <button class="status-btn btn-transfer ${st === 'Transfer' ? 'active' : ''}" ondblclick="setBacklogStatus('${u.id}', 'Transfer')">Transfer</button>
+          <button class="status-btn btn-urgent ${st === 'Urgent support!' ? 'active' : ''}" ondblclick="setBacklogStatus('${u.id}', 'Urgent support!')">Urgent</button>
         </div>
       </td>
       <td style="text-align: center;">
-        <button class="secondary" onclick="revertToAvailable('${u.id}')" style="background: #e74c3c;">นำกลับมาขาย</button>
+        <button class="secondary" ondblclick="revertToAvailable('${u.id}')" style="background: #e74c3c;">นำกลับมาขาย</button>
       </td>
     `;
     container.appendChild(tr);
