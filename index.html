@@ -459,6 +459,14 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
   border-top: 1px solid #eee;
 }
 
+.filter-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
 .filter-summary-badge {
   background: linear-gradient(135deg, #6c5ce7, #00cec9);
   color: white;
@@ -466,11 +474,30 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
   border-radius: 20px;
   font-weight: bold;
   font-size: 0.88rem;
-  margin-bottom: 20px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   box-shadow: 0 2px 8px rgba(108, 92, 231, 0.2);
+}
+
+.reset-filter-btn {
+  background: #ff7675;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(255, 118, 117, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.reset-filter-btn:hover {
+  background: #d63031;
+  transform: translateY(-1px);
 }
 
 .pagination-controls {
@@ -586,14 +613,15 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
       <button class="tab-btn" onclick="switchTab(event, 'floorplanTab')">แปลนผังชั้น Floor Plan</button>
     </div>
 
+    <!-- แถวล่าง: แท็บ Admin และ สรุปภาพรวม -->
     <div class="admin-tab-group">
-      <button class="admin-tab-btn overview-tab-btn" onclick="switchTab(event, 'overviewTab')">📊 ข้อมูลสรุป</button>
+      <button class="admin-tab-btn overview-tab-btn" onclick="switchTab(event, 'overviewTab')">📊 สรุปภาพรวมโครงการ</button>
       <button class="admin-tab-btn" onclick="switchTab(event, 'backlogTab')">🔒 Backlog</button>
     </div>
   </div>
 
   <div id="overviewTab" class="tab-content">
-    <h2 style="color: #2d3436; border-left: 5px solid #00cec9; padding-left: 15px; margin-bottom: 20px;">ข้อมูลสรุป (Overview)</h2>
+    <h2 style="color: #2d3436; border-left: 5px solid #00cec9; padding-left: 15px; margin-bottom: 20px;">สรุปภาพรวมโครงการ (Overview)</h2>
     <div class="overview-grid">
       
       <!-- Card 1: ข้อมูลโครงการ -->
@@ -731,8 +759,11 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
       </select>
     </div>  
 
-    <div class="filter-summary-badge" id="filterSummaryBox">
-       ผลการกรอง: <span id="filterCount">0</span> ห้อง
+    <div class="filter-wrapper">
+      <div class="filter-summary-badge" id="filterSummaryBox">
+         ผลการกรอง: <span id="filterCount">0</span> ห้อง
+      </div>
+      <button class="reset-filter-btn" onclick="resetUnitsFilter()">🔄 ล้างการกรองทั้งหมด</button>
     </div>
 
     <!-- Excel-Style Table View -->
@@ -805,8 +836,11 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
       </select>
     </div>
 
-    <div class="filter-summary-badge" style="background: linear-gradient(135deg, #2ed573, #1e90ff);">
-      📊 จำนวนในรายการ Backlog: <span id="backlogFilterCount">0</span> ห้อง
+    <div class="filter-wrapper">
+      <div class="filter-summary-badge" style="background: linear-gradient(135deg, #2ed573, #1e90ff);">
+        📊 จำนวนในรายการ Backlog: <span id="backlogFilterCount">0</span> ห้อง
+      </div>
+      <button class="reset-filter-btn" onclick="resetBacklogFilter()">🔄 ล้างการกรองทั้งหมด</button>
     </div>
 
     <!-- Excel-Style Table View for Backlog -->
@@ -1077,6 +1111,26 @@ function loadSheetsData() {
 function handleFilterChange() {
   currentPage = 1;
   render();
+}
+
+function resetUnitsFilter() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('buildingFilter').value = 'all';
+  document.getElementById('typeFilter').value = 'all';
+  document.getElementById('floorFilter').value = 'all';
+  document.getElementById('SideFilter').value = 'all';
+  document.getElementById('priceFilter').value = 'all';
+  currentPage = 1;
+  render();
+  showToast('🔄 ล้างการกรองยูนิตพร้อมขายเรียบร้อย', '#6c5ce7');
+}
+
+function resetBacklogFilter() {
+  document.getElementById('backlogSearchInput').value = '';
+  document.getElementById('backlogTypeFilter').value = 'all';
+  document.getElementById('backlogStatusFilter').value = 'all';
+  renderBacklog();
+  showToast('🔄 ล้างการกรอง Backlog เรียบร้อย', '#2ed573');
 }
 
 function changePage(delta) {
