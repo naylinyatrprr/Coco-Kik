@@ -812,7 +812,6 @@ function parseCSV(text) {
     const saleMatch = rawSaleVal.match(/\d+(\.\d+)?/);
     if (saleMatch) {
       let parsedNum = parseFloat(saleMatch[0]);
-      // หากราคามากกว่า 1,000 แสดงว่าเป็นราคาเต็ม (เช่น 2,500,000) ให้หาร 1,000,000 เพื่อแปลงเป็นหน่วยล้านบาท
       if (parsedNum > 1000) {
         parsedNum = parsedNum / 1000000;
       }
@@ -839,10 +838,8 @@ function parseCSV(text) {
     });
 
     if (item.id) {
-     if (item.sheetStatus && item.sheetStatus.trim() !== '') {
-  if (!solds.includes(item.id)) solds.push(item.id);
-  // ...
-}
+      if (item.sheetStatus && item.sheetStatus.trim() !== '') {
+        if (!solds.includes(item.id)) solds.push(item.id);
       }
       data.push(item);
     }
