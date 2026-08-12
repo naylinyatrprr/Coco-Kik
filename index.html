@@ -806,7 +806,12 @@ function parseCSV(text) {
     item['size'] = row[2] || '';
     item['floor'] = row[4] || '';
     item['price'] = row[5] || ''; 
-    item['sale'] = parseInt(row[ุ6]) || (row[6] ? parseInt(row[6].match(/\d+/)) : 0);
+    
+    // แก้ไขจุดผิดพลาเดิม (ลบวรรณยุกต์ไทยออก) และจัดการแปลงคอมมาในตัวเลข
+    const rawSaleVal = row[6] ? row[6].replace(/,/g, '') : '';
+    const saleMatch = rawSaleVal.match(/\d+(\.\d+)?/);
+    item['sale'] = saleMatch ? parseFloat(saleMatch[0]) : (parseFloat(rawSaleVal) || 0);
+    
     item['side'] = row[7] || '';  
     
     headers.forEach((h, index) => {
