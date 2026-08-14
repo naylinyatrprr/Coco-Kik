@@ -195,7 +195,6 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
 }
 
 .status-btn.btn-booking.active { background: #2ed573; color: white; border-color: #2ed573; }
-.status-btn.btn-on-progress.active { background: #ffa502; color: white; border-color: #ffa502; }
 .status-btn.btn-transfer.active { background: #1e90ff; color: white; border-color: #1e90ff; }
 .status-btn.btn-urgent.active { background: #ff6b81; color: white; border-color: #ff6b81; }
 
@@ -800,10 +799,6 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
         <div>🟢 Booking</div>
         <div class="count" id="countBooking">0</div>
       </div>
-      <div class="backlog-stat-card" style="background: #ffa502;" onclick="filterBacklogStatus('On progress')">
-        <div>🟡 On progress</div>
-        <div class="count" id="countOnProgress">0</div>
-      </div>
       <div class="backlog-stat-card" style="background: #1e90ff;" onclick="filterBacklogStatus('Transfer')">
         <div>🔵 Transfer</div>
         <div class="count" id="countTransfer">0</div>
@@ -830,7 +825,6 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
       <select id="backlogStatusFilter" onchange="renderBacklog()" style="padding: 10px; border-radius: 8px; border: 1px solid #ccc;">
         <option value="all">ทุกสถานะ Backlog</option>
         <option value="Booking">Booking</option>
-        <option value="On progress">On progress</option>
         <option value="Transfer">Transfer</option>
         <option value="Urgent support!">Urgent support!</option>
       </select>
@@ -1242,7 +1236,7 @@ function renderBacklog() {
   const statusFilter = document.getElementById('backlogStatusFilter').value;
   const typeFilter = document.getElementById('backlogTypeFilter').value;
 
-  let counts = { 'Booking': 0, 'On progress': 0, 'Transfer': 0, 'Urgent support!': 0 };
+  let counts = { 'Booking': 0, 'Transfer': 0, 'Urgent support!': 0 };
   
   solds.forEach(id => {
     const st = backlogStatus[id] || 'Booking';
@@ -1250,7 +1244,6 @@ function renderBacklog() {
   });
 
   document.getElementById('countBooking').innerText = counts['Booking'];
-  document.getElementById('countOnProgress').innerText = counts['On progress'];
   document.getElementById('countTransfer').innerText = counts['Transfer'];
   document.getElementById('countUrgent').innerText = counts['Urgent support!'];
   document.getElementById('countTotalSold').innerText = solds.length;
@@ -1285,7 +1278,6 @@ function renderBacklog() {
       <td>
         <div style="display: flex; gap: 4px; flex-wrap: wrap;">
           <button class="status-btn btn-booking ${st === 'Booking' ? 'active' : ''}" ondblclick="setBacklogStatus('${u.id}', 'Booking')">Booking</button>
-          <button class="status-btn btn-on-progress ${st === 'On progress' ? 'active' : ''}" ondblclick="setBacklogStatus('${u.id}', 'On progress')">On progress</button>
           <button class="status-btn btn-transfer ${st === 'Transfer' ? 'active' : ''}" ondblclick="setBacklogStatus('${u.id}', 'Transfer')">Transfer</button>
           <button class="status-btn btn-urgent ${st === 'Urgent support!' ? 'active' : ''}" ondblclick="setBacklogStatus('${u.id}', 'Urgent support!')">Urgent</button>
         </div>
