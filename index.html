@@ -1104,6 +1104,9 @@ function parseCSV(text) {
 
   const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase().trim());
   const data = [];
+  
+  // ล้างค่า solds เดิมเพื่อดึงสถานะจริงจาก CSV ใหม่ทุกครั้ง
+  solds = []; 
 
   for (let i = 1; i < lines.length; i++) {
     const row = parseCSVLine(lines[i]);
@@ -1145,12 +1148,22 @@ function parseCSV(text) {
     });
 
     if (item.id) {
+      // ตรวจสอบ: ถ้าช่องสถานะใน CSV มีข้อมูล ให้จัดเป็นห้องที่ขายแล้ว (solds)
       if (item.sheetStatus && item.sheetStatus.trim() !== '') {
-        if (!solds.includes(item.id)) solds.push(item.id);
+        solds.push(item.id);
+        // ซิงค์สถานะ Backlog จาก CSV ลงในระบบ (ถ้ามี)
+        if (!backlogStatus[item.id]) {
+          backlogStatus[item.id] = item.sheetStatus;
+        }
       }
       data.push(item);
     }
   }
+  
+  // อัปเดต localStorage ให้ตรงกับ CSV ล่าสุด
+  localStorage.setItem('solds', JSON.stringify(solds));
+  localStorage.setItem('backlogStatus', JSON.stringify(backlogStatus));
+
   return data;
 }
 
