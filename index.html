@@ -85,7 +85,6 @@ header p {
 
 /* responsive rule: ซ่อนคอลัมน์ขนาดและราคาปกติบนหน้าจอมือถือ (<= 600px) */
 @media (max-width: 600px) {
-  /* ตารางยูนิตพร้อมขาย: ซ่อนคอลัมน์ที่ 4 (ขนาด) และ คอลัมน์ที่ 6 (ราคาปกติ) */
   #unitsTab .excel-table th:nth-child(4),
   #unitsTab .excel-table td:nth-child(4),
   #unitsTab .excel-table th:nth-child(6),
@@ -93,7 +92,6 @@ header p {
     display: none;
   }
 
-  /* ตาราง Backlog: ซ่อนคอลัมน์ที่ 3 (ขนาด) */
   #backlogTab .excel-table th:nth-child(3),
   #backlogTab .excel-table td:nth-child(3) {
     display: none;
@@ -496,6 +494,7 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
 }
 .reset-filter-btn:hover {
   background: #d63031;
+  color: white;
   transform: translateY(-1px);
 }
 
@@ -604,7 +603,6 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
 
 <div class="container">
   <div class="nav-header-wrapper">
-    <!-- แถวบน: 4 แท็บหลัก ฟิตความกว้างหน้าจอ -->
     <div class="sales-tabs">
       <button class="tab-btn active" onclick="switchTab(event, 'roomTypesTab')">ตัวอย่างห้อง Room Types</button>
       <button class="tab-btn" onclick="switchTab(event, 'unitsTab')">ยูนิตพร้อมขาย Ready to Move!</button>
@@ -612,7 +610,6 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
       <button class="tab-btn" onclick="switchTab(event, 'floorplanTab')">แปลนผังชั้น Floor Plan</button>
     </div>
 
-    <!-- แถวล่าง: แท็บ Admin และ สรุปภาพรวม -->
     <div class="admin-tab-group">
       <button class="admin-tab-btn overview-tab-btn" onclick="switchTab(event, 'overviewTab')">📊 สรุปภาพรวมโครงการ</button>
       <button class="admin-tab-btn" onclick="switchTab(event, 'backlogTab')">🔒 Backlog</button>
@@ -623,7 +620,6 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
     <h2 style="color: #2d3436; border-left: 5px solid #00cec9; padding-left: 15px; margin-bottom: 20px;">สรุปภาพรวมโครงการ (Overview)</h2>
     <div class="overview-grid">
       
-      <!-- Card 1: ข้อมูลโครงการ -->
       <div class="overview-card">
         <h3>🏢 ข้อมูลโครงการ</h3>
         <pre id="textCard1">ข้อมูลโครงการเคฟโคโค่บางแสน  
@@ -641,7 +637,6 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
         <button class="copy-btn" onclick="copyTextFromElement('textCard1')">📋 คัดลอกข้อความ</button>
       </div>
 
-      <!-- Card 2: เงื่อนไขการจอง -->
       <div class="overview-card">
         <h3>📝 เงื่อนไขการจอง</h3>
         <pre id="textCard2">เงื่อนไขการจอง
@@ -651,7 +646,6 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
         <button class="copy-btn" onclick="copyTextFromElement('textCard2')">📋 คัดลอกข้อความ</button>
       </div>
 
-      <!-- Card 3: รายละเอียดการชำระเงิน -->
       <div class="overview-card">
         <h3>💳 รายละเอียดการชำระเงิน</h3>
         <pre id="textCard3">รายละเอียดการชำระเงิน 
@@ -661,7 +655,6 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
         <button class="copy-btn" onclick="copyTextFromElement('textCard3')">📋 คัดลอกข้อความ</button>
       </div>
 
-      <!-- Card 4: โปรโมชั่นการโอนกรรมสิทธิ์ -->
       <div class="overview-card" style="grid-column: 1 / -1;">
         <h3>🎁 โปรโมชั่นฟรีค่าใช้จ่ายวันโอน</h3>
         <pre id="textCard4">กรณีลูกค้าโอนกรรมสิทธิ์ภายใน     จะได้รับฟรีค่าใช้จ่าย ณ วันโอน ทั้งหมด 7รายการ ได้แก่
@@ -735,6 +728,7 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
         <option value="7">ชั้น 7</option>
         <option value="8">ชั้น 8</option>
       </select>
+
       <select id="SideFilter" onchange="handleFilterChange()" style="padding: 10px; border-radius: 8px; border: 1px solid #ccc;">
         <option value="all">ทุกวิว</option>
         <option value="2">วิวนอก</option>
@@ -834,7 +828,7 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
       <div class="filter-summary-badge" style="background: linear-gradient(135deg, #2ed573, #1e90ff);">
         📊 จำนวนในรายการ Backlog: <span id="backlogFilterCount">0</span> ห้อง
       </div>
-      <button class="reset-filter-btn" onclick="resetBacklogFilter()"></button>
+      <button class="reset-filter-btn" onclick="resetBacklogFilter()">ล้างการกรอง Backlog</button>
     </div>
 
     <!-- Excel-Style Table View for Backlog -->
@@ -848,7 +842,6 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
             <th>ชั้น</th>
             <th>ราคาพิเศษ</th>
             <th>สถานะ Backlog</th>
-            <th style="text-align: center;">การจัดการ</th>
           </tr>
         </thead>
         <tbody id="backlogUnits"></tbody>
@@ -984,6 +977,39 @@ const roomPlans = {
   '1 Bedroom': { src: 'https://i.ibb.co/pjNm8N3B/18-Furniture-list-1.jpg', title: 'แปลนห้อง - 1 Bedroom' },
   '1 Bed plus': { src: 'https://i.ibb.co/hxYxLQ5d/21-Furniture-list-4.jpg', title: 'แปลนห้อง - 1 Bed Plus' }
 };
+
+function filterByPrice(unit, priceFilterValue) {
+    let salePrice = parseFloat(unit.sale || 0);
+
+    switch (priceFilterValue) {
+        case '<=1.69':
+            return salePrice <= 1.69;
+        case '<=1.79':
+            return salePrice > 1.69 && salePrice <= 1.79;
+        case '<=1.89':
+            return salePrice > 1.79 && salePrice <= 1.89;
+        case '<=1.99':
+            return salePrice > 1.89 && salePrice <= 1.99;
+        case '<=2.09':
+            return salePrice > 1.99 && salePrice <= 2.09;
+        case '<=2.19':
+            return salePrice > 2.09 && salePrice <= 2.19;
+        case '<=2.29':
+            return salePrice > 2.19 && salePrice <= 2.29;
+        case '<=2.39':
+            return salePrice > 2.29 && salePrice <= 2.39;
+        case '<=2.49':
+            return salePrice > 2.39 && salePrice <= 2.49;
+        case '<=2.59':
+            return salePrice > 2.49 && salePrice <= 2.59;
+        case '2.60-2.99':
+            return salePrice >= 2.60 && salePrice <= 2.99;
+        case '>=3.00':
+            return salePrice >= 3.00;
+        default:
+            return true;
+    }
+}
 
 function showToast(message, bgColor = '#2ed573') {
   const toast = document.getElementById('toast');
@@ -1154,22 +1180,9 @@ function render() {
       if (side === '3' && !uSide.includes('ใน') && uSide !== '3') return false;
     }
 
-    if (priceRange !== 'all') {
-      const numPrice = u.sale || 0;
+    // กรองราคาด้วยฟังก์ชัน filterByPrice
+    if (!filterByPrice(u, priceRange)) return false;
 
-      if (numPrice > 0) {
-        if (priceRange.startsWith('<=')) {
-          const max = parseFloat(priceRange.replace('<=', ''));
-          if (numPrice > max) return false;
-        } else if (priceRange.includes('-')) {
-          const [min, max] = priceRange.split('-').map(parseFloat);
-          if (numPrice < min || numPrice > max) return false;
-        } else if (priceRange.startsWith('>=')) {
-          const min = parseFloat(priceRange.replace('>=', ''));
-          if (numPrice < min) return false;
-        }
-      }
-    }
     return true;
   });
 
@@ -1262,7 +1275,7 @@ function renderBacklog() {
   container.innerHTML = '';
 
   if (filteredBacklog.length === 0) {
-    container.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 30px; color: #7f8c8d; font-weight: bold;">❌ ไม่พบรายการใน Backlog</td></tr>';
+    container.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 30px; color: #7f8c8d; font-weight: bold;">❌ ไม่พบรายการใน Backlog</td></tr>';
     return;
   }
 
@@ -1281,9 +1294,6 @@ function renderBacklog() {
           <button class="status-btn btn-transfer ${st === 'Transfer' ? 'active' : ''}" ondblclick="setBacklogStatus('${u.id}', 'Transfer')">Transfer</button>
           <button class="status-btn btn-urgent ${st === 'Urgent support!' ? 'active' : ''}" ondblclick="setBacklogStatus('${u.id}', 'Urgent support!')">Urgent</button>
         </div>
-      </td>
-      <td style="text-align: center;">
-        <button class="secondary" ondblclick="revertToAvailable('${u.id}')" style="background: #e74c3c;">นำกลับมาขาย</button>
       </td>
     `;
     container.appendChild(tr);
@@ -1318,17 +1328,6 @@ function markAsSold(unitId) {
     render();
     renderBacklog();
   }
-}
-
-function revertToAvailable(unitId) {
-  solds = solds.filter(id => id !== unitId);
-  delete backlogStatus[unitId];
-  localStorage.setItem('solds', JSON.stringify(solds));
-  localStorage.setItem('backlogStatus', JSON.stringify(backlogStatus));
-
-  showToast(`🔄 นำห้อง ${unitId} กลับมาเป็นยูนิตพร้อมขายสำเร็จ!`, '#1e90ff');
-  render();
-  renderBacklog();
 }
 
 function toggleFavorite(unitId) {
