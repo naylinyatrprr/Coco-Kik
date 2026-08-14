@@ -1559,6 +1559,35 @@ function closeSummaryModal() {
 window.onload = function() {
   loadSheetsData();
 };
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4W2Rgw7xzw25G0DV7Ozh0D6oKj-m3ROpMu4FQMFNKzzmBvt6p_Zjez4do3SxjEaBZ/exec";
+
+function updateUnitStatus(unitId, newStatus) {
+  // เปลี่ยนสถานะบน UI หน้าเว็บทันทีเพื่อให้ผู้ใช้รู้สึกว่าตอบสนองไว
+  alert(`กำลังอัปเดตสถานะห้อง ${unitId}...`);
+
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors", 
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      unitId: unitId,
+      status: newStatus
+    })
+  })
+  .then(() => {
+    alert(`อัปเดตสถานะห้อง ${unitId} บน Google Sheets เรียบร้อยแล้ว!`);
+    // สามารถสั่งโหลดข้อมูล/ตารางหน้าเว็บใหม่ได้ที่นี่
+  })
+  .catch(error => {
+    console.error("Error:", error);
+    alert("เกิดข้อผิดพลาดในการอัปเดตข้อมูล");
+  });
+}
+
+// ตัวอย่างการเรียกใช้งานเมื่อกดปุ่มขาย
+// updateUnitStatus("A101", "ขายแล้ว");
 </script>
 </body>
 </html>
