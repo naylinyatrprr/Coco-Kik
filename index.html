@@ -993,6 +993,7 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
 
 <script>
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS7Ns1czbS1AE4Nw-YSqdr-HDlrCYJ-mIOy3JZ_Ep31lSRZ_BjuJnzOwN54t5u6jIVtafeWmHEUclA5/pub?output=csv';
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4W2Rgw7xzw25G0DV7Ozh0D6oKj-m3ROpMu4FQMFNKzzmBvt6p_Zjez4do3SxjEaBZ/exec";
 
 let units = [];
 let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
@@ -1018,36 +1019,48 @@ const roomPlans = {
   '1 Bed plus': { src: 'https://i.ibb.co/hxYxLQ5d/21-Furniture-list-4.jpg', title: 'แปลนห้อง - 1 Bed Plus' }
 };
 
+// -------------------------------------------------------------
+// 🔥 ฟังก์ชันสำหรับส่งข้อมูลการอัปเดตไปที่ Google Sheets (Apps Script)
+// -------------------------------------------------------------
+function updateUnitStatus(unitId, newStatus) {
+  const formData = new URLSearchParams();
+  formData.append("unitId", unitId);
+  formData.append("status", newStatus);
+
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: formData.toString()
+  })
+  .then(() => {
+    showToast(`✅ ส่งข้อมูลอัปเดตห้อง ${unitId} ไปยัง Google Sheets แล้ว!`);
+  })
+  .catch(error => {
+    console.error("Error:", error);
+    showToast("⚠️ เกิดข้อผิดพลาดในการอัปเดตไปยัง Google Sheets", "#ff6b81");
+  });
+}
+
 function filterByPrice(unit, priceFilterValue) {
     let salePrice = parseFloat(unit.sale || 0);
 
     switch (priceFilterValue) {
-        case '<=1.69':
-            return salePrice <= 1.69;
-        case '<=1.79':
-            return salePrice > 1.69 && salePrice <= 1.79;
-        case '<=1.89':
-            return salePrice > 1.79 && salePrice <= 1.89;
-        case '<=1.99':
-            return salePrice > 1.89 && salePrice <= 1.99;
-        case '<=2.09':
-            return salePrice > 1.99 && salePrice <= 2.09;
-        case '<=2.19':
-            return salePrice > 2.09 && salePrice <= 2.19;
-        case '<=2.29':
-            return salePrice > 2.19 && salePrice <= 2.29;
-        case '<=2.39':
-            return salePrice > 2.29 && salePrice <= 2.39;
-        case '<=2.49':
-            return salePrice > 2.39 && salePrice <= 2.49;
-        case '<=2.59':
-            return salePrice > 2.49 && salePrice <= 2.59;
-        case '2.60-2.99':
-            return salePrice >= 2.60 && salePrice <= 2.99;
-        case '>=3.00':
-            return salePrice >= 3.00;
-        default:
-            return true;
+        case '<=1.69': return salePrice <= 1.69;
+        case '<=1.79': return salePrice > 1.69 && salePrice <= 1.79;
+        case '<=1.89': return salePrice > 1.79 && salePrice <= 1.89;
+        case '<=1.99': return salePrice > 1.89 && salePrice <= 1.99;
+        case '<=2.09': return salePrice > 1.99 && salePrice <= 2.09;
+        case '<=2.19': return salePrice > 2.09 && salePrice <= 2.19;
+        case '<=2.29': return salePrice > 2.19 && salePrice <= 2.29;
+        case '<=2.39': return salePrice > 2.29 && salePrice <= 2.39;
+        case '<=2.49': return salePrice > 2.39 && salePrice <= 2.49;
+        case '<=2.59': return salePrice > 2.49 && salePrice <= 2.59;
+        case '2.60-2.99': return salePrice >= 2.60 && salePrice <= 2.99;
+        case '>=3.00': return salePrice >= 3.00;
+        default: return true;
     }
 }
 
@@ -1104,8 +1117,6 @@ function parseCSV(text) {
 
   const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase().trim());
   const data = [];
-  
-  // ล้างค่า solds เดิมเพื่อดึงสถานะจริงจาก CSV ใหม่ทุกครั้ง
   solds = []; 
 
   for (let i = 1; i < lines.length; i++) {
@@ -1122,9 +1133,7 @@ function parseCSV(text) {
     const saleMatch = rawSaleVal.match(/\d+(\.\d+)?/);
     if (saleMatch) {
       let parsedNum = parseFloat(saleMatch[0]);
-      if (parsedNum > 1000) {
-        parsedNum = parsedNum / 1000000;
-      }
+      if (parsedNum > 1000) parsedNum = parsedNum / 1000000;
       item['sale'] = parsedNum;
     } else {
       item['sale'] = 0;
@@ -1148,10 +1157,8 @@ function parseCSV(text) {
     });
 
     if (item.id) {
-      // ตรวจสอบ: ถ้าช่องสถานะใน CSV มีข้อมูล ให้จัดเป็นห้องที่ขายแล้ว (solds)
       if (item.sheetStatus && item.sheetStatus.trim() !== '') {
         solds.push(item.id);
-        // ซิงค์สถานะ Backlog จาก CSV ลงในระบบ (ถ้ามี)
         if (!backlogStatus[item.id]) {
           backlogStatus[item.id] = item.sheetStatus;
         }
@@ -1160,7 +1167,6 @@ function parseCSV(text) {
     }
   }
   
-  // อัปเดต localStorage ให้ตรงกับ CSV ล่าสุด
   localStorage.setItem('solds', JSON.stringify(solds));
   localStorage.setItem('backlogStatus', JSON.stringify(backlogStatus));
 
@@ -1233,7 +1239,6 @@ function render() {
       if (side === '3' && !uSide.includes('ใน') && uSide !== '3') return false;
     }
 
-    // กรองราคาด้วยฟังก์ชัน filterByPrice
     if (!filterByPrice(u, priceRange)) return false;
 
     return true;
@@ -1358,13 +1363,23 @@ function filterBacklogStatus(status) {
   renderBacklog();
 }
 
+// -------------------------------------------------------------
+// 🔥 เรียกใช้ updateUnitStatus เมื่อเปลี่ยนสถานะใน Backlog
+// -------------------------------------------------------------
 function setBacklogStatus(unitId, status) {
   backlogStatus[unitId] = status;
   localStorage.setItem('backlogStatus', JSON.stringify(backlogStatus));
   showToast(`✅ อัปเดตสถานะห้อง ${unitId} เป็น "${status}" แล้ว!`);
+  
+  // ส่งไป Google Sheets
+  updateUnitStatus(unitId, status);
+
   renderBacklog();
 }
 
+// -------------------------------------------------------------
+// 🔥 เรียกใช้ updateUnitStatus เมื่อกดปุ่ม "ขาย"
+// -------------------------------------------------------------
 function markAsSold(unitId) {
   if (!solds.includes(unitId)) {
     solds.push(unitId);
@@ -1378,6 +1393,10 @@ function markAsSold(unitId) {
     localStorage.setItem('compare', JSON.stringify(compare));
 
     showToast(`🎉 ทำการย้ายห้อง ${unitId} เข้าสู่รายการ Backlog สำเร็จ!`);
+    
+    // ส่งไป Google Sheets
+    updateUnitStatus(unitId, "Booking");
+
     render();
     renderBacklog();
   }
@@ -1559,69 +1578,6 @@ function closeSummaryModal() {
 window.onload = function() {
   loadSheetsData();
 };
- <script>
-// 1. ฟังก์ชันส่งข้อมูลไปยัง Google Sheets
-function updateUnitStatus(unitId, newStatus) {
-  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4W2Rgw7xzw25G0DV7Ozh0D6oKj-m3ROpMu4FQMFNKzzmBvt6p_Zjez4do3SxjEaBZ/exec";
-
-  const formData = new URLSearchParams();
-  formData.append("unitId", unitId);
-  formData.append("status", newStatus);
-
-  fetch(GOOGLE_SCRIPT_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: formData.toString()
-  })
-  .then(() => {
-    showToast(`✅ ส่งข้อมูลอัปเดตห้อง ${unitId} ไปยัง Google Sheets แล้ว!`);
-  })
-  .catch(error => {
-    console.error("Error:", error);
-    showToast("⚠️ เกิดข้อผิดพลาดในการอัปเดตไปยัง Google Sheets", "#ff6b81");
-  });
-}
-
-// 2. เรียกใช้เมื่อกดปุ่ม "ขาย"
-function markAsSold(unitId) {
-  if (!solds.includes(unitId)) {
-    solds.push(unitId);
-    if (!backlogStatus[unitId]) backlogStatus[unitId] = 'Booking';
-    
-    localStorage.setItem('solds', JSON.stringify(solds));
-    localStorage.setItem('backlogStatus', JSON.stringify(backlogStatus));
-    
-    favorites = favorites.filter(id => id !== unitId);
-    compare = compare.filter(id => id !== unitId);
-    localStorage.setItem('favorites', JSON.stringify(favorites));
-    localStorage.setItem('compare', JSON.stringify(compare));
-
-    showToast(`🎉 ทำการย้ายห้อง ${unitId} เข้าสู่รายการ Backlog สำเร็จ!`);
-    
-    // ส่งสถานะ "Booking" ไปยัง Google Sheets
-    updateUnitStatus(unitId, "Booking");
-
-    render();
-    renderBacklog();
-  }
-}
-
-// 3. เรียกใช้เมื่อกดเปลี่ยนสถานะในหน้า Backlog
-function setBacklogStatus(unitId, status) {
-  backlogStatus[unitId] = status;
-  localStorage.setItem('backlogStatus', JSON.stringify(backlogStatus));
-  showToast(`✅ อัปเดตสถานะห้อง ${unitId} เป็น "${status}" แล้ว!`);
-  
-  // ส่งสถานะใหม่ ไปยัง Google Sheets
-  updateUnitStatus(unitId, status);
-
-  renderBacklog();
-}
-</script>
-}
 </script>
 </body>
 </html>
