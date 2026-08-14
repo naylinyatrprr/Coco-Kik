@@ -229,51 +229,14 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
   box-sizing: border-box;
   box-shadow: 0 20px 50px rgba(0,0,0,0.3);
 }
-.summary-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 2px solid #f1f2f6;
-  padding-bottom: 12px;
-  margin-bottom: 10px;
-}
-.summary-header h2 {
-  margin: 0;
-  font-size: 1.25rem;
-  color: #2d3436;
-}
-.clear-all-btn {
-  background: #ff7675;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: 0.2s;
-}
-.clear-all-btn:hover {
-  background: #d63031;
-}
 .summary-list { 
-  margin: 10px 0 15px 0; 
+  margin: 15px 0; 
   padding: 0 8px 0 0; 
   list-style: none; 
   flex-grow: 1;
   overflow-y: auto; 
 }
-.summary-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; border-bottom: 1px solid #eee; }
-.btn-remove-item {
-  background: #ff7675;
-  color: white;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  margin-left: 6px;
-  transition: 0.2s;
-}
-.btn-remove-item:hover {
-  background: #d63031;
-}
+.summary-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
 
 /* Navigation & Tabs Restructured */
 .nav-header-wrapper {
@@ -973,10 +936,7 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
 
 <div id="summaryModal">
   <div class="summary-modal-box">
-    <div class="summary-header">
-      <h2 id="summaryTitle"></h2>
-      <button id="clearAllSummaryBtn" class="clear-all-btn" style="display: none;">🗑️ ล้างรายการทั้งหมด</button>
-    </div>
+    <h2 id="summaryTitle" style="margin-top: 0; margin-bottom: 10px;"></h2>
     <ul id="summaryList" class="summary-list"></ul>
     <button class="primary" style="width: 100%; margin-top: auto; padding: 12px;" onclick="closeSummaryModal()">ปิดหน้าต่าง</button>
   </div>
@@ -993,7 +953,6 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
 
 <script>
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS7Ns1czbS1AE4Nw-YSqdr-HDlrCYJ-mIOy3JZ_Ep31lSRZ_BjuJnzOwN54t5u6jIVtafeWmHEUclA5/pub?output=csv';
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4W2Rgw7xzw25G0DV7Ozh0D6oKj-m3ROpMu4FQMFNKzzmBvt6p_Zjez4do3SxjEaBZ/exec";
 
 let units = [];
 let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
@@ -1019,48 +978,36 @@ const roomPlans = {
   '1 Bed plus': { src: 'https://i.ibb.co/hxYxLQ5d/21-Furniture-list-4.jpg', title: 'แปลนห้อง - 1 Bed Plus' }
 };
 
-// -------------------------------------------------------------
-// 🔥 ฟังก์ชันสำหรับส่งข้อมูลการอัปเดตไปที่ Google Sheets (Apps Script)
-// -------------------------------------------------------------
-function updateUnitStatus(unitId, newStatus) {
-  const formData = new URLSearchParams();
-  formData.append("unitId", unitId);
-  formData.append("status", newStatus);
-
-  fetch(GOOGLE_SCRIPT_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: formData.toString()
-  })
-  .then(() => {
-    showToast(`✅ ส่งข้อมูลอัปเดตห้อง ${unitId} ไปยัง Google Sheets แล้ว!`);
-  })
-  .catch(error => {
-    console.error("Error:", error);
-    showToast("⚠️ เกิดข้อผิดพลาดในการอัปเดตไปยัง Google Sheets", "#ff6b81");
-  });
-}
-
 function filterByPrice(unit, priceFilterValue) {
     let salePrice = parseFloat(unit.sale || 0);
 
     switch (priceFilterValue) {
-        case '<=1.69': return salePrice <= 1.69;
-        case '<=1.79': return salePrice > 1.69 && salePrice <= 1.79;
-        case '<=1.89': return salePrice > 1.79 && salePrice <= 1.89;
-        case '<=1.99': return salePrice > 1.89 && salePrice <= 1.99;
-        case '<=2.09': return salePrice > 1.99 && salePrice <= 2.09;
-        case '<=2.19': return salePrice > 2.09 && salePrice <= 2.19;
-        case '<=2.29': return salePrice > 2.19 && salePrice <= 2.29;
-        case '<=2.39': return salePrice > 2.29 && salePrice <= 2.39;
-        case '<=2.49': return salePrice > 2.39 && salePrice <= 2.49;
-        case '<=2.59': return salePrice > 2.49 && salePrice <= 2.59;
-        case '2.60-2.99': return salePrice >= 2.60 && salePrice <= 2.99;
-        case '>=3.00': return salePrice >= 3.00;
-        default: return true;
+        case '<=1.69':
+            return salePrice <= 1.69;
+        case '<=1.79':
+            return salePrice > 1.69 && salePrice <= 1.79;
+        case '<=1.89':
+            return salePrice > 1.79 && salePrice <= 1.89;
+        case '<=1.99':
+            return salePrice > 1.89 && salePrice <= 1.99;
+        case '<=2.09':
+            return salePrice > 1.99 && salePrice <= 2.09;
+        case '<=2.19':
+            return salePrice > 2.09 && salePrice <= 2.19;
+        case '<=2.29':
+            return salePrice > 2.19 && salePrice <= 2.29;
+        case '<=2.39':
+            return salePrice > 2.29 && salePrice <= 2.39;
+        case '<=2.49':
+            return salePrice > 2.39 && salePrice <= 2.49;
+        case '<=2.59':
+            return salePrice > 2.49 && salePrice <= 2.59;
+        case '2.60-2.99':
+            return salePrice >= 2.60 && salePrice <= 2.99;
+        case '>=3.00':
+            return salePrice >= 3.00;
+        default:
+            return true;
     }
 }
 
@@ -1117,7 +1064,6 @@ function parseCSV(text) {
 
   const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase().trim());
   const data = [];
-  solds = []; 
 
   for (let i = 1; i < lines.length; i++) {
     const row = parseCSVLine(lines[i]);
@@ -1133,7 +1079,9 @@ function parseCSV(text) {
     const saleMatch = rawSaleVal.match(/\d+(\.\d+)?/);
     if (saleMatch) {
       let parsedNum = parseFloat(saleMatch[0]);
-      if (parsedNum > 1000) parsedNum = parsedNum / 1000000;
+      if (parsedNum > 1000) {
+        parsedNum = parsedNum / 1000000;
+      }
       item['sale'] = parsedNum;
     } else {
       item['sale'] = 0;
@@ -1158,18 +1106,11 @@ function parseCSV(text) {
 
     if (item.id) {
       if (item.sheetStatus && item.sheetStatus.trim() !== '') {
-        solds.push(item.id);
-        if (!backlogStatus[item.id]) {
-          backlogStatus[item.id] = item.sheetStatus;
-        }
+        if (!solds.includes(item.id)) solds.push(item.id);
       }
       data.push(item);
     }
   }
-  
-  localStorage.setItem('solds', JSON.stringify(solds));
-  localStorage.setItem('backlogStatus', JSON.stringify(backlogStatus));
-
   return data;
 }
 
@@ -1239,6 +1180,7 @@ function render() {
       if (side === '3' && !uSide.includes('ใน') && uSide !== '3') return false;
     }
 
+    // กรองราคาด้วยฟังก์ชัน filterByPrice
     if (!filterByPrice(u, priceRange)) return false;
 
     return true;
@@ -1363,23 +1305,13 @@ function filterBacklogStatus(status) {
   renderBacklog();
 }
 
-// -------------------------------------------------------------
-// 🔥 เรียกใช้ updateUnitStatus เมื่อเปลี่ยนสถานะใน Backlog
-// -------------------------------------------------------------
 function setBacklogStatus(unitId, status) {
   backlogStatus[unitId] = status;
   localStorage.setItem('backlogStatus', JSON.stringify(backlogStatus));
   showToast(`✅ อัปเดตสถานะห้อง ${unitId} เป็น "${status}" แล้ว!`);
-  
-  // ส่งไป Google Sheets
-  updateUnitStatus(unitId, status);
-
   renderBacklog();
 }
 
-// -------------------------------------------------------------
-// 🔥 เรียกใช้ updateUnitStatus เมื่อกดปุ่ม "ขาย"
-// -------------------------------------------------------------
 function markAsSold(unitId) {
   if (!solds.includes(unitId)) {
     solds.push(unitId);
@@ -1393,10 +1325,6 @@ function markAsSold(unitId) {
     localStorage.setItem('compare', JSON.stringify(compare));
 
     showToast(`🎉 ทำการย้ายห้อง ${unitId} เข้าสู่รายการ Backlog สำเร็จ!`);
-    
-    // ส่งไป Google Sheets
-    updateUnitStatus(unitId, "Booking");
-
     render();
     renderBacklog();
   }
@@ -1495,24 +1423,18 @@ function showSummary(type) {
   const modal = document.getElementById('summaryModal');
   const title = document.getElementById('summaryTitle');
   const list = document.getElementById('summaryList');
-  const clearBtn = document.getElementById('clearAllSummaryBtn');
   list.innerHTML = '';
 
   let items = [];
   if (type === 'available') {
     title.innerText = '🏢 ยูนิตทั้งหมดที่พร้อมขาย';
     items = units.filter(u => !solds.includes(u.id));
-    clearBtn.style.display = 'none';
   } else if (type === 'compare') {
     title.innerText = '📊 รายการยูนิตที่เลือกเปรียบเทียบ';
     items = units.filter(u => compare.includes(u.id));
-    clearBtn.style.display = items.length > 0 ? 'block' : 'none';
-    clearBtn.onclick = () => clearAllSummary('compare');
   } else if (type === 'favorites') {
     title.innerText = '❤️ รายการยูนิตที่สนใจ (Favorites)';
     items = units.filter(u => favorites.includes(u.id));
-    clearBtn.style.display = items.length > 0 ? 'block' : 'none';
-    clearBtn.onclick = () => clearAllSummary('favorites');
   }
 
   if (items.length === 0) {
@@ -1521,15 +1443,6 @@ function showSummary(type) {
     items.forEach(u => {
       const li = document.createElement('li');
       li.className = 'summary-item';
-      
-      let actionButtons = `<button class="primary" onclick="closeSummaryModal(); openModal('${u.id}');">ดูข้อมูล</button>`;
-      
-      if (type === 'compare') {
-        actionButtons += `<button class="btn-remove-item" onclick="removeFromSummary('${u.id}', 'compare')">ลบ</button>`;
-      } else if (type === 'favorites') {
-        actionButtons += `<button class="btn-remove-item" onclick="removeFromSummary('${u.id}', 'favorites')">ลบ</button>`;
-      }
-
       li.innerHTML = `
         <div>
           <strong>ห้อง ${u.id}</strong> (${u.type} - ${u.size} ตร.ม.)
@@ -1537,38 +1450,13 @@ function showSummary(type) {
             ปกติ ${u.price} ลบ. | <span class="summary-sale-price">พิเศษ ${u.sale} ลบ.</span>
           </div>
         </div>
-        <div style="display: flex; gap: 4px; align-items: center;">
-          ${actionButtons}
-        </div>
+        <button class="primary" onclick="closeSummaryModal(); openModal('${u.id}');">ดูข้อมูล</button>
       `;
       list.appendChild(li);
     });
   }
 
   modal.style.display = 'block';
-}
-
-function removeFromSummary(unitId, type) {
-  if (type === 'compare') {
-    toggleCompare(unitId);
-  } else if (type === 'favorites') {
-    toggleFavorite(unitId);
-  }
-  showSummary(type);
-}
-
-function clearAllSummary(type) {
-  if (type === 'compare') {
-    compare = [];
-    localStorage.setItem('compare', JSON.stringify(compare));
-    showToast('ล้างรายการเปรียบเทียบทั้งหมดเรียบร้อยแล้ว', '#ff7675');
-  } else if (type === 'favorites') {
-    favorites = [];
-    localStorage.setItem('favorites', JSON.stringify(favorites));
-    showToast('ล้างรายการ Favorite ทั้งหมดเรียบร้อยแล้ว', '#ff7675');
-  }
-  render();
-  showSummary(type);
 }
 
 function closeSummaryModal() {
