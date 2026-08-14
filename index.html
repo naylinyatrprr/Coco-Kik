@@ -229,14 +229,51 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
   box-sizing: border-box;
   box-shadow: 0 20px 50px rgba(0,0,0,0.3);
 }
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #f1f2f6;
+  padding-bottom: 12px;
+  margin-bottom: 10px;
+}
+.summary-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #2d3436;
+}
+.clear-all-btn {
+  background: #ff7675;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.clear-all-btn:hover {
+  background: #d63031;
+}
 .summary-list { 
-  margin: 15px 0; 
+  margin: 10px 0 15px 0; 
   padding: 0 8px 0 0; 
   list-style: none; 
   flex-grow: 1;
   overflow-y: auto; 
 }
-.summary-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
+.summary-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; border-bottom: 1px solid #eee; }
+.btn-remove-item {
+  background: #ff7675;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  margin-left: 6px;
+  transition: 0.2s;
+}
+.btn-remove-item:hover {
+  background: #d63031;
+}
 
 /* Navigation & Tabs Restructured */
 .nav-header-wrapper {
@@ -936,7 +973,10 @@ button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; f
 
 <div id="summaryModal">
   <div class="summary-modal-box">
-    <h2 id="summaryTitle" style="margin-top: 0; margin-bottom: 10px;"></h2>
+    <div class="summary-header">
+      <h2 id="summaryTitle"></h2>
+      <button id="clearAllSummaryBtn" class="clear-all-btn" style="display: none;">🗑️ ล้างรายการทั้งหมด</button>
+    </div>
     <ul id="summaryList" class="summary-list"></ul>
     <button class="primary" style="width: 100%; margin-top: auto; padding: 12px;" onclick="closeSummaryModal()">ปิดหน้าต่าง</button>
   </div>
@@ -1423,18 +1463,24 @@ function showSummary(type) {
   const modal = document.getElementById('summaryModal');
   const title = document.getElementById('summaryTitle');
   const list = document.getElementById('summaryList');
+  const clearBtn = document.getElementById('clearAllSummaryBtn');
   list.innerHTML = '';
 
   let items = [];
   if (type === 'available') {
     title.innerText = '🏢 ยูนิตทั้งหมดที่พร้อมขาย';
     items = units.filter(u => !solds.includes(u.id));
+    clearBtn.style.display = 'none';
   } else if (type === 'compare') {
     title.innerText = '📊 รายการยูนิตที่เลือกเปรียบเทียบ';
     items = units.filter(u => compare.includes(u.id));
+    clearBtn.style.display = items.length > 0 ? 'block' : 'none';
+    clearBtn.onclick = () => clearAllSummary('compare');
   } else if (type === 'favorites') {
     title.innerText = '❤️ รายการยูนิตที่สนใจ (Favorites)';
     items = units.filter(u => favorites.includes(u.id));
+    clearBtn.style.display = items.length > 0 ? 'block' : 'none';
+    clearBtn.onclick = () => clearAllSummary('favorites');
   }
 
   if (items.length === 0) {
@@ -1443,6 +1489,15 @@ function showSummary(type) {
     items.forEach(u => {
       const li = document.createElement('li');
       li.className = 'summary-item';
+      
+      let actionButtons = `<button class="primary" onclick="closeSummaryModal(); openModal('${u.id}');">ดูข้อมูล</button>`;
+      
+      if (type === 'compare') {
+        actionButtons += `<button class="btn-remove-item" onclick="removeFromSummary('${u.id}', 'compare')">ลบ</button>`;
+      } else if (type === 'favorites') {
+        actionButtons += `<button class="btn-remove-item" onclick="removeFromSummary('${u.id}', 'favorites')">ลบ</button>`;
+      }
+
       li.innerHTML = `
         <div>
           <strong>ห้อง ${u.id}</strong> (${u.type} - ${u.size} ตร.ม.)
@@ -1450,13 +1505,38 @@ function showSummary(type) {
             ปกติ ${u.price} ลบ. | <span class="summary-sale-price">พิเศษ ${u.sale} ลบ.</span>
           </div>
         </div>
-        <button class="primary" onclick="closeSummaryModal(); openModal('${u.id}');">ดูข้อมูล</button>
+        <div style="display: flex; gap: 4px; align-items: center;">
+          ${actionButtons}
+        </div>
       `;
       list.appendChild(li);
     });
   }
 
   modal.style.display = 'block';
+}
+
+function removeFromSummary(unitId, type) {
+  if (type === 'compare') {
+    toggleCompare(unitId);
+  } else if (type === 'favorites') {
+    toggleFavorite(unitId);
+  }
+  showSummary(type);
+}
+
+function clearAllSummary(type) {
+  if (type === 'compare') {
+    compare = [];
+    localStorage.setItem('compare', JSON.stringify(compare));
+    showToast('ล้างรายการเปรียบเทียบทั้งหมดเรียบร้อยแล้ว', '#ff7675');
+  } else if (type === 'favorites') {
+    favorites = [];
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+    showToast('ล้างรายการ Favorite ทั้งหมดเรียบร้อยแล้ว', '#ff7675');
+  }
+  render();
+  showSummary(type);
 }
 
 function closeSummaryModal() {
