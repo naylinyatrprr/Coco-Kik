@@ -1180,7 +1180,6 @@ function render() {
       if (side === '3' && !uSide.includes('ใน') && uSide !== '3') return false;
     }
 
-    // กรองราคาด้วยฟังก์ชัน filterByPrice
     if (!filterByPrice(u, priceRange)) return false;
 
     return true;
@@ -1236,8 +1235,7 @@ function render() {
       <td style="text-decoration: line-through; color: #a0aec0; font-size: 0.85rem;">${u.price} ลบ.</td>
       <td style="color: #ff4757; font-weight: bold;">${u.sale} ลบ.</td>
       <td style="text-align: center; white-space: nowrap;">
-        <button class="primary" onclick="openModal('${u.id}')" style="margin-right: 4px;">รายละเอียด</button>
-        <button class="secondary" ondblclick="markAsSold('${u.id}')">ขาย</button>
+        <button class="primary" onclick="openModal('${u.id}')">รายละเอียด</button>
       </td>
     `;
     container.appendChild(tr);
