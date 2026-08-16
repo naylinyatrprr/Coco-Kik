@@ -1107,6 +1107,10 @@ function parseCSV(text) {
     if (item.id) {
       if (item.sheetStatus && item.sheetStatus.trim() !== '') {
         if (!solds.includes(item.id)) solds.push(item.id);
+        // ตั้งค่า default สถานะใน backlog เป็น 'Booking'
+        if (!backlogStatus[item.id]) {
+          backlogStatus[item.id] = 'Booking';
+        }
       }
       data.push(item);
     }
@@ -1119,6 +1123,7 @@ function loadSheetsData() {
     .then(res => res.text())
     .then(csvText => {
       units = parseCSV(csvText);
+      localStorage.setItem('backlogStatus', JSON.stringify(backlogStatus));
       render();
       renderBacklog();
     })
