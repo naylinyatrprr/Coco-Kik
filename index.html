@@ -1064,10 +1064,13 @@ function parseCSV(text) {
 
   const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase().trim());
   const data = [];
+  
+  // ล้างรายการ solds เดิม เพื่ออัปเดตสถานะตามจริงจาก Sheet
+  solds = [];
 
   for (let i = 1; i < lines.length; i++) {
     const row = parseCSVLine(lines[i]);
-    const item = { remark: '', hasRemark: false, highlights: [], hasHighlight: false, side: '', sale: 0, price: '' };
+    const item = { remark: '', hasRemark: false, highlights: [], hasHighlight: false, side: '', sale: 0, price: '', sheetStatus: '' };
 
     item['id'] = row[0] || '';
     item['type'] = row[1] || '';
@@ -1105,25 +1108,35 @@ function parseCSV(text) {
     });
 
     if (item.id) {
+      // เช็กเฉพาะกรณีที่ช่อง status ใน Sheet มีข้อมูลอยู่จริงๆ เท่านั้น
       if (item.sheetStatus && item.sheetStatus.trim() !== '') {
-        if (!solds.includes(item.id)) solds.push(item.id);
-        // ตั้งค่า default สถานะใน backlog เป็น 'Booking'
+        solds.push(item.id);
         if (!backlogStatus[item.id]) {
           backlogStatus[item.id] = 'Booking';
         }
+      } else {
+        // หากใน Sheet ลบค่าออก ให้ลบออกจาก backlogStatus ด้วย
+        delete backlogStatus[item.id];
       }
       data.push(item);
     }
   }
+
+  // อัปเดต LocalStorage ให้ตรงกับ Sheet ปัจจุบัน
+  localStorage.setItem('solds', JSON.stringify(solds));
+  localStorage.setItem('backlogStatus', JSON.stringify(backlogStatus));
+
   return data;
 }
 
 function loadSheetsData() {
-  fetch(SHEET_CSV_URL)
+  // เพิ่ม Timestamp เพื่อป้องกัน Cache ของเบราว์เซอร์/Google
+  const fetchUrl = `${SHEET_CSV_URL}&_t=${new Date().getTime()}`;
+  
+  fetch(fetchUrl)
     .then(res => res.text())
     .then(csvText => {
       units = parseCSV(csvText);
-      localStorage.setItem('backlogStatus', JSON.stringify(backlogStatus));
       render();
       renderBacklog();
     })
